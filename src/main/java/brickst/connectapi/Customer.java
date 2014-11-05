@@ -38,4 +38,25 @@ public class Customer
     	attributes = new ArrayList<CustomerAttribute>();
     	channelAddresses = new ArrayList<CustomerAttribute>();
     }
+    
+    public CustomerAttribute getAttribute(String attrName)
+    {
+    	for (CustomerAttribute attr : attributes) {
+    		if (attr.name.equals(attrName)) {
+    			return attr;
+    		}
+    	}
+    	return null;
+    }
+
+    
+    public CustomerAttribute getChannelAddress(String attrName)
+    {
+    	for (CustomerAttribute attr : channelAddresses) {
+    		if (attr.name.equals(attrName)) {
+    			return attr;
+    		}
+    	}
+    	return null;
+    }
 }

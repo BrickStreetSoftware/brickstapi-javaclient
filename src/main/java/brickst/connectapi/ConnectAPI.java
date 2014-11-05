@@ -121,6 +121,45 @@ public class ConnectAPI
 		}		
 	}
 
+	public Attribute getAttribute(String attrName) 
+		throws ClientProtocolException, IOException, AuthenticationException, URISyntaxException
+	{
+		// construct api path for entry point
+		String apiPath = apiBaseURL.getPath();
+		if (! apiPath.endsWith("/")) {
+			apiPath += "/";
+		}
+		apiPath += "metadata/customer/" + attrName;
+		
+		BasicHttpContext http = new BasicHttpContext();
+		HttpGet httpGet = getGet(apiPath, http);
+		
+		CloseableHttpClient httpClient = HttpClients.createDefault();	
+		CloseableHttpResponse httpResp = null;
+		
+		String json = null;
+		
+		try 
+		{
+			httpResp = httpClient.execute(httpGet);
+			HttpEntity entity = httpResp.getEntity();
+			json = EntityUtils.toString(entity);
+			
+			// map json to pojo using jackson databinding
+			ObjectMapper mapper = new ObjectMapper();
+			Attribute attribute = mapper.readValue(json, Attribute.class);
+			return attribute;
+		} 
+		finally {
+			if (httpResp != null) {
+				try { httpResp.close(); } catch (Exception x) {}
+			}
+			if (httpClient != null) {
+				try { httpClient.close(); } catch (Exception x) {}
+			}
+		}				
+	}
+	
 	private Customer _getCustomer(String apiPath) 
 			throws AuthenticationException, URISyntaxException, ClientProtocolException, IOException
 	{

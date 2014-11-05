@@ -3,7 +3,7 @@
   
   <!--  NOTE: test params are associated with the api location and credentials -->
 
-  <parameter name="apiUrl" value="https://exmaple.com/brickstapi"/>
+  <parameter name="apiUrl" value="https://example.com/brickstapi"/>
   <parameter name="apiUser" value="username"/>
   <parameter name="apiPass" value="password"/>
   
@@ -17,6 +17,9 @@
   	<parameter name="custId" value="38506" />
   	<parameter name="custEmail" value="user@example.com" />
   	<parameter name="custAltId" value="user@example.com" />
+  	<parameter name="attributeName" value="Test Attribute 1" />
+  	<parameter name="attributeValue" value="suite 2222" />
+  	<parameter name="preferenceName" value="IOS Push Test Multi" />
     <classes>
       <class name="testapi.TestCustomer"/>
       <class name="testapi.TestConversation"/>

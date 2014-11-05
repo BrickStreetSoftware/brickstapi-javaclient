@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Random;
 
 import org.apache.http.auth.AuthenticationException;
@@ -14,8 +15,10 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import brickst.connectapi.Attribute;
 import brickst.connectapi.ConnectAPI;
 import brickst.connectapi.Customer;
+import brickst.connectapi.CustomerAttribute;
 
 public class TestCustomer 
 {
@@ -142,7 +145,7 @@ public class TestCustomer
 		if (val < 0) {	// should be positive
 			val *= -1;
 		}
-		String custVal = "user+" + val + "@example.com";
+		String custVal = "cmaeda+" + val + "@cmaeda.com";
 		
 		Customer c = new Customer();
 		c.emailAddress = custVal;
@@ -202,6 +205,256 @@ public class TestCustomer
 		Assert.assertEquals(c4.state, origState);
 		Assert.assertEquals(c4.postalCode, origPostal);
 		Assert.assertEquals(c4.country, origCountry);		
+	}
+
+	@Parameters({"attributeName", "attributeValue"})
+	@Test
+	public void testAddCustomerWithAttribute(String attributeName, String attributeValue) 
+			throws AuthenticationException, ClientProtocolException, URISyntaxException, IOException
+	{
+		// lookup attribute
+		Attribute attrDef = api.getAttribute(attributeName);
+		Assert.assertNotNull(attrDef, "Attribute Not Found");
+		Assert.assertEquals(attrDef.name, attributeName);
+		
+		// create new customer
+		Random rand = new Random();
+		long val = rand.nextLong();
+		if (val < 0) {	// should be positive
+			val *= -1;
+		}
+		String custVal = "cmaeda+" + val + "@cmaeda.com";
+		
+		Customer c = new Customer();
+		c.emailAddress = custVal;
+		c.altCustomerID = custVal;
+		c.addressLine1 = "215 S Broadway 241";
+		c.city = "Salem";
+		c.state = "NH";
+		c.country = "USA";
+		
+		Customer c2 = api.addCustomer(c);
+		Assert.assertNotNull(c2, "Customer is null");
+		Assert.assertNotNull(c2.id, "Customer ID is null");
+		Assert.assertEquals(c2.emailAddress, custVal);
+		Assert.assertEquals(c2.altCustomerID, custVal);
+
+		// add an attribute
+		CustomerAttribute attr = c2.getAttribute(attributeName);
+		if (attr == null) {
+			attr = new CustomerAttribute();
+			attr.name = attrDef.name;
+			attr.type = attrDef.type;
+			attr.dataType = attrDef.dataType;
+			attr.value = attributeValue;
+			c2.attributes.add(attr);
+		}
+		else {
+			attr.value = attributeValue;
+		}
+		
+		Customer c3 = api.updateCustomer(c2);
+		Assert.assertNotNull(c3, "Customer 3 is null");
+		
+		// check saved data
+		CustomerAttribute c3attr = c3.getAttribute(attributeName);
+		Assert.assertNotNull(c3attr);
+		Assert.assertEquals(c3attr.value, attributeValue);
+	}
+
+	@Parameters({"preferenceName"})
+	@Test
+	public void testAddCustomerWithPreference(String preferenceName) 
+			throws AuthenticationException, ClientProtocolException, URISyntaxException, IOException
+	{
+		// lookup attribute
+		Attribute attrDef = api.getAttribute(preferenceName);
+		Assert.assertNotNull(attrDef, "Attribute Not Found");
+		Assert.assertEquals(attrDef.name, preferenceName);
+		String attrType = attrDef.type;
+		
+		// create new customer
+		Random rand = new Random();
+		long val = rand.nextLong();
+		if (val < 0) {	// should be positive
+			val *= -1;
+		}
+		String custVal = "cmaeda+" + val + "@cmaeda.com";
+		
+		Customer c = new Customer();
+		c.emailAddress = custVal;
+		c.altCustomerID = custVal;
+		c.addressLine1 = "215 S Broadway 241";
+		c.city = "Salem";
+		c.state = "NH";
+		c.country = "USA";
+		
+		Customer c2 = api.addCustomer(c);
+		Assert.assertNotNull(c2, "Customer is null");
+		Assert.assertNotNull(c2.id, "Customer ID is null");
+		Assert.assertEquals(c2.emailAddress, custVal);
+		Assert.assertEquals(c2.altCustomerID, custVal);
+
+		c = c2;
+		
+		//
+		// add preference
+		//
+		
+		CustomerAttribute attr = null;
+		if ("preference".equals(attrType)) {
+			// add a preference
+			attr = c.getAttribute(preferenceName);
+			if (attr == null) {
+				attr = new CustomerAttribute();
+				attr.name = attrDef.name;
+				attr.type = attrDef.type;
+				attr.dataType = attrDef.dataType;
+				// start with 1 value
+				attr.preferenceValues = new String[1];
+				attr.preferenceValues[0] = "pval" + val;
+				c.attributes.add(attr);
+			}
+			else {
+				// add a value
+				String[] vals = attr.preferenceValues;
+				String[] newVals = new String[vals.length + 1];
+				System.arraycopy(vals, 0, newVals, 0, vals.length);
+				newVals[newVals.length - 1] = "pval" + val;
+				attr.preferenceValues = newVals;
+			}
+		}
+		else if ("multiaddress".equals(attrType)) {
+			// add a channel address
+			attr = c.getChannelAddress(preferenceName);
+			if (attr == null) {
+				attr = new CustomerAttribute();
+				attr.name = attrDef.name;
+				attr.type = attrDef.type;
+				attr.dataType = attrDef.dataType;
+				// start with 1 value
+				attr.preferenceValues = new String[1];
+				attr.preferenceValues[0] = "pval" + val;
+				c.channelAddresses.add(attr);
+			}
+			else {
+				String[] vals = attr.preferenceValues;
+				String[] newVals = new String[vals.length + 1];
+				System.arraycopy(vals, 0, newVals, 0, vals.length);
+				newVals[newVals.length - 1] = "pval" + val;
+				attr.preferenceValues = newVals;
+			}
+		}
+		else {
+			Assert.assertTrue(false, "Unknown pref type " + attrType);
+		}
+		
+		// save orig value
+		String[] prefVals = attr.preferenceValues;
+		
+		c2 = api.updateCustomer(c);
+		Assert.assertNotNull(c2, "Customer 2 is null");
+		
+		// check saved data
+		CustomerAttribute c2attr = null;
+		if ("preference".equals(attrType)) {
+			c2attr = c2.getAttribute(preferenceName);
+		}
+		else if ("multiaddress".equals(attrType)) {
+			c2attr = c2.getChannelAddress(preferenceName);
+		}
+		Assert.assertNotNull(c2attr);
+		Assert.assertTrue(Arrays.equals(c2attr.preferenceValues, prefVals));
+
+		c = c2;
+		
+		//
+		// add a second pref value
+		//
+		
+		// new random value
+		val = rand.nextLong();
+		if (val < 0) {	// should be positive
+			val *= -1;
+		}
+
+		if ("preference".equals(attrType)) {
+			// add a preference
+			attr = c.getAttribute(preferenceName);
+			Assert.assertNotNull(attr);
+
+			// add a value
+			String[] vals = attr.preferenceValues;
+			String[] newVals = new String[vals.length + 1];
+			System.arraycopy(vals, 0, newVals, 0, vals.length);
+			newVals[newVals.length - 1] = "pval" + val;
+			attr.preferenceValues = newVals;
+		}
+		else if ("multiaddress".equals(attrType)) {
+			// add a channel address
+			attr = c.getChannelAddress(preferenceName);
+			Assert.assertNotNull(attr);
+			
+			String[] vals = attr.preferenceValues;
+			String[] newVals = new String[vals.length + 1];
+			System.arraycopy(vals, 0, newVals, 0, vals.length);
+			newVals[newVals.length - 1] = "pval" + val;
+			attr.preferenceValues = newVals;
+		}
+		else {
+			Assert.assertTrue(false, "Unknown pref type " + attrType);
+		}
+
+		prefVals = attr.preferenceValues;
+		c2 = api.updateCustomer(c);
+		Assert.assertNotNull(c2, "Customer 2 is null");
+		
+		// check saved data
+		c2attr = null;
+		if ("preference".equals(attrType)) {
+			c2attr = c2.getAttribute(preferenceName);
+		}
+		else if ("multiaddress".equals(attrType)) {
+			c2attr = c2.getChannelAddress(preferenceName);
+		}
+		Assert.assertNotNull(c2attr);
+		Assert.assertTrue(Arrays.equals(c2attr.preferenceValues, prefVals));
+
+		c = c2;
+		
+		//
+		// remove a preference value
+		//
+		
+		if ("preference".equals(attrType)) {
+			// add a preference
+			attr = c.getAttribute(preferenceName);
+		}
+		else if ("multiaddress".equals(attrType)) {
+			attr = c.getChannelAddress(preferenceName);
+		}		
+		Assert.assertNotNull(attr);
+		
+		// remove first value
+		String[] oldVals = attr.preferenceValues;
+		String[] newVals = new String[oldVals.length - 1];
+		System.arraycopy(oldVals, 1, newVals, 0, newVals.length);	
+		attr.preferenceValues = newVals;
+		
+		prefVals = attr.preferenceValues;
+		c2 = api.updateCustomer(c);
+		Assert.assertNotNull(c2, "Customer 2 is null");
+		
+		// check saved data
+		c2attr = null;
+		if ("preference".equals(attrType)) {
+			c2attr = c2.getAttribute(preferenceName);
+		}
+		else if ("multiaddress".equals(attrType)) {
+			c2attr = c2.getChannelAddress(preferenceName);
+		}
+		Assert.assertNotNull(c2attr);
+		Assert.assertTrue(Arrays.equals(c2attr.preferenceValues, prefVals));
 	}
 
 

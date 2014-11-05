@@ -10,6 +10,7 @@ import java.util.Date;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.client.ClientProtocolException;
 
+import brickst.connectapi.Attribute;
 import brickst.connectapi.ConnectAPI;
 import brickst.connectapi.Customer;
 import brickst.connectapi.CustomerAttribute;
@@ -79,32 +80,64 @@ public class TestEventCampaign
 		
 		if (tokenName != null && tokenValue != null) {
 		
-			// Now add the device token to the customer record
-			ArrayList<CustomerAttribute> attrs = customer.channelAddresses;
-			CustomerAttribute foundAttr = null;
-			// search for attribute
-			for (CustomerAttribute attr : attrs) {
-				if (attr.name.equals(tokenName)) {
-					foundAttr = attr;
+			// fetch attribute metadata
+			Attribute attrDef = api.getAttribute(tokenName);
+			String attrType = attrDef.type;
+			boolean doupdate = false;
+			
+			CustomerAttribute attr = customer.getChannelAddress(tokenName);
+			if ("attribute".equals(attrType) || "channel".equals("attrType")) {
+				if (attr == null) {
+					attr = new CustomerAttribute();
+					attr.name = attrDef.name;
+					attr.type = attrDef.type;
+					attr.dataType = attrDef.dataType;
+					attr.value = tokenValue;
+					customer.attributes.add(attr);
+					doupdate = true;
+				}
+				else {
+					// update if new
+					if (! tokenValue.equals(attr.value)) {
+						attr.value = tokenValue;
+						doupdate = true;
+					}
+				}
+			}
+			else if ("preference".equals(attrType) || "multiaddress".equals(attrType)) {
+				if (attr == null) {
+					attr = new CustomerAttribute();
+					attr.name = attrDef.name;
+					attr.type = attrDef.type;
+					attr.dataType = attrDef.dataType;
+					// start with 1 value
+					attr.preferenceValues = new String[1];
+					attr.preferenceValues[0] = tokenValue;
+					customer.channelAddresses.add(attr);
+					doupdate = true;
+				}
+				else {
+					// existing preference record
+					// add the token value if it is not already there
+					// the push channel code will automatically remove invalid device tokens
+					String[] vals = attr.preferenceValues;
+					boolean valuefound = false;
+					for (int i = 0; i < vals.length; i++) {
+						String val = vals[i];
+						if (tokenValue.equals(val)) {
+							valuefound = true;
 					break;
 				}
 			}
 		
-			boolean doupdate = false;
-			if (foundAttr == null) {
-				foundAttr = new CustomerAttribute();
-				foundAttr.name = tokenName;
-				foundAttr.value = tokenValue;
-				foundAttr.type = CustomerAttribute.TYPE_ATTRIBUTE;
-				foundAttr.dataType = EventParameterMaster.TYPE_STRING;
-				attrs.add(foundAttr);
+					// append new device token to existing preference record
+					if (! valuefound) {
+						String[] newVals = new String[vals.length + 1];
+						System.arraycopy(vals, 0, newVals, 0, vals.length);
+						newVals[newVals.length - 1] = tokenValue;
+						attr.preferenceValues = newVals;
 				doupdate = true;
 			}
-			else {
-				if (foundAttr.value == null || !foundAttr.value.equals(tokenValue)) {
-					// update attr and save
-					foundAttr.value = tokenValue;
-					doupdate = true;
 				}
 			}
 		
@@ -116,7 +149,6 @@ public class TestEventCampaign
 				}
 				customer = custSave2;
 			}
-
 		}
 		
 		//
@@ -184,8 +216,8 @@ public class TestEventCampaign
 		}
 		
 		try {
-//			test.testExistingEventCampaign(altCustId, eventName, tokenName, tokenValue);
-			test.testExistingEventCampaign(altCustId, eventName, null, null);
+			test.testExistingEventCampaign(altCustId, eventName, tokenName, tokenValue);
+			//test.testExistingEventCampaign(altCustId, eventName, null, null);
 		}
 		catch (Throwable e) {
 			e.printStackTrace();
