@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
 
 import org.apache.http.ParseException;
 import org.apache.http.auth.AuthenticationException;

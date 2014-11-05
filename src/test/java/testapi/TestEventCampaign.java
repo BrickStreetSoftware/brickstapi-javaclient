@@ -16,7 +16,6 @@ import brickst.connectapi.Customer;
 import brickst.connectapi.CustomerAttribute;
 import brickst.connectapi.Event;
 import brickst.connectapi.EventParameter;
-import brickst.connectapi.EventParameterMaster;
 
 /**
  * This test program posts an event to an event-triggered campaign.
