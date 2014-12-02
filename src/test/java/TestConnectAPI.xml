@@ -17,10 +17,11 @@
   	<parameter name="custId" value="38506" />
   	<parameter name="custEmail" value="user@example.com" />
   	<parameter name="custAltId" value="user@example.com" />
-  	<parameter name="attributeName" value="Test Attribute 1" />
-  	<parameter name="attributeValue" value="suite 2222" />
-  	<parameter name="preferenceName" value="IOS Push Test Multi" />
-    <classes>
+  	<parameter name="attributeName" value="iOS Device Token ID" />
+  	<parameter name="attributeValue" value="ab22ksdnhf39047fnhw83" />
+  	<parameter name="preferenceName" value="Preferred Colors" />
+  	<parameter name="multiaddressName" value="Android Test Channel" />
+  	<classes>
       <class name="testapi.TestCustomer"/>
       <class name="testapi.TestConversation"/>
     </classes>
