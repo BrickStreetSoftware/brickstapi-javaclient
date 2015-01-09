@@ -7,6 +7,7 @@ import java.net.URL;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.ParseException;
+import org.apache.http.StatusLine;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
@@ -141,6 +142,12 @@ public class ConnectAPI
 		try 
 		{
 			httpResp = httpClient.execute(httpGet);
+			StatusLine statusLine = httpResp.getStatusLine();
+			int statusCode = statusLine.getStatusCode();
+			if (statusCode >= 400) {
+				return null;
+			}
+
 			HttpEntity entity = httpResp.getEntity();
 			json = EntityUtils.toString(entity);
 			
@@ -173,6 +180,12 @@ public class ConnectAPI
 		try 
 		{
 			httpResp = httpClient.execute(httpGet);
+			StatusLine statusLine = httpResp.getStatusLine();
+			int statusCode = statusLine.getStatusCode();
+			if (statusCode >= 400) {
+				return null;
+			}
+			
 			HttpEntity entity = httpResp.getEntity();
 			json = EntityUtils.toString(entity);
 			
@@ -262,6 +275,12 @@ public class ConnectAPI
 		try 
 		{
 			httpResp = httpClient.execute(httpPut);
+			StatusLine statusLine = httpResp.getStatusLine();
+			int statusCode = statusLine.getStatusCode();
+			if (statusCode >= 400) {
+				return null;
+			}
+
 			HttpEntity entity = httpResp.getEntity();
 			json = EntityUtils.toString(entity);
 
@@ -308,6 +327,12 @@ public class ConnectAPI
 		try 
 		{
 			httpResp = httpClient.execute(httpPost);
+			StatusLine statusLine = httpResp.getStatusLine();
+			int statusCode = statusLine.getStatusCode();
+			if (statusCode >= 400) {
+				return null;
+			}
+
 			HttpEntity entity = httpResp.getEntity();
 			json = EntityUtils.toString(entity);
 
@@ -347,6 +372,12 @@ public class ConnectAPI
 		try 
 		{
 			httpResp = httpClient.execute(httpGet);
+			StatusLine statusLine = httpResp.getStatusLine();
+			int statusCode = statusLine.getStatusCode();
+			if (statusCode >= 400) {
+				return null;
+			}
+
 			HttpEntity entity = httpResp.getEntity();
 			json = EntityUtils.toString(entity);
 			
@@ -379,6 +410,12 @@ public class ConnectAPI
 		try 
 		{
 			httpResp = httpClient.execute(httpGet);
+			StatusLine statusLine = httpResp.getStatusLine();
+			int statusCode = statusLine.getStatusCode();
+			if (statusCode >= 400) {
+				return null;
+			}
+
 			HttpEntity entity = httpResp.getEntity();
 			json = EntityUtils.toString(entity);
 			
@@ -445,6 +482,12 @@ public class ConnectAPI
 		try 
 		{
 			httpResp = httpClient.execute(httpGet);
+			StatusLine statusLine = httpResp.getStatusLine();
+			int statusCode = statusLine.getStatusCode();
+			if (statusCode >= 400) {
+				return null;
+			}
+
 			HttpEntity entity = httpResp.getEntity();
 			event = EntityUtils.toString(entity);
 			return event;			
@@ -487,6 +530,12 @@ public class ConnectAPI
 		try 
 		{
 			httpResp = httpClient.execute(httpPost);
+			StatusLine statusLine = httpResp.getStatusLine();
+			int statusCode = statusLine.getStatusCode();
+			if (statusCode >= 400) {
+				return null;
+			}
+
 			HttpEntity entity = httpResp.getEntity();
 			json = EntityUtils.toString(entity);
 
